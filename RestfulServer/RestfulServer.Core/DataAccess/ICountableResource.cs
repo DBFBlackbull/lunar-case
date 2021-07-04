@@ -1,8 +1,11 @@
-﻿namespace RestfulServer.Core.DataAccess
+﻿using System.Threading.Tasks;
+using RestfulServer.Core.DataAccess.Models;
+
+namespace RestfulServer.Core.DataAccess
 {
     public interface ICountableResource
     {
-        int GetValue(string id);
-        bool ChangeValue(string id, int changeSize);
+        Task<ValueDto> GetValue(string id);
+        Task<ValueDto> ChangeValueBy(string id, int value);
     }
 }

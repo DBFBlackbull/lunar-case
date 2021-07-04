@@ -11,10 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RestfulServer.Core.DataAccess;
-using RestfulServer.DataAccess;
 
-namespace RestfulServer.Website
+namespace Microservice.Business
 {
     public class Startup
     {
@@ -30,9 +28,7 @@ namespace RestfulServer.Website
         {
             services.AddControllers();
             services.AddMvc();
-            SetupDependencyInjection(services);
             services.AddSwaggerGen();
-            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,11 +38,11 @@ namespace RestfulServer.Website
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lunar Test API");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lunar Business API");
             });
 
             // app.UseHttpsRedirection();
@@ -56,15 +52,6 @@ namespace RestfulServer.Website
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-        }
-
-        private static void SetupDependencyInjection(IServiceCollection services)
-        {
-            // services.AddSingleton<ICountableResource, InMemoryCountableResource>();
-            services.AddHttpClient<ICountableResource, MicroserviceCountableResource>(c =>
-            {
-                c.BaseAddress = new Uri("http://localhost:5002/");
-            });
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RestfulServer.Core.DataAccess;
 
@@ -17,11 +18,12 @@ namespace RestfulServer.Website.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetResource(string customerId)
+        public async Task<IActionResult> GetResource(string customerId)
         {
             try
             {
-                return Ok(_countableResource.GetValue(customerId));
+                var result = await _countableResource.GetValue(customerId);
+                return Ok(result.Value);
             }
             catch (ArgumentNullException e)
             {
@@ -35,7 +37,7 @@ namespace RestfulServer.Website.Controllers
 
         [HttpPut]
         [Route("[action]/{increment:int?}")]
-        public IActionResult IncrementResource([FromRoute] string customerId, [FromRoute] int? increment = null)
+        public async Task<IActionResult> IncrementResource([FromRoute] string customerId, [FromRoute] int? increment = null)
         {
             // We want to increment by 1 by default
             var incrementSize = increment ?? 1;
@@ -50,14 +52,13 @@ namespace RestfulServer.Website.Controllers
 
             try
             {
-                var success = _countableResource.ChangeValue(customerId, incrementSize);
-                return success 
-                    ? Ok("Resource incremented") 
-                    : InternalError();
-            }
-            catch (ArgumentNullException)
-            {
-                return InvalidCustomerId(customerId);
+                var dto = await _countableResource.ChangeValueBy(customerId, incrementSize);
+                if (dto.Success)
+                    return Ok("Resource incremented");
+                        
+                return dto.ExceptionThrown
+                    ? InternalError()
+                    : BadRequest(dto.ErrorMessage);
             }
             catch (Exception)
             {
@@ -67,7 +68,7 @@ namespace RestfulServer.Website.Controllers
 
         [HttpPut]
         [Route("[action]/{decrement:int?}")]
-        public IActionResult DecrementResource([FromRoute] string customerId, [FromRoute] int? decrement)
+        public async Task<IActionResult> DecrementResource([FromRoute] string customerId, [FromRoute] int? decrement)
         {
             // We want to increment by 1 by default
             var decrementSize = decrement ?? -1;
@@ -82,14 +83,13 @@ namespace RestfulServer.Website.Controllers
 
             try
             {
-                var success = _countableResource.ChangeValue(customerId, decrementSize);
-                return success 
-                    ? Ok("Resource decremented") 
-                    : InternalError();
-            }
-            catch (ArgumentNullException)
-            {
-                return InvalidCustomerId(customerId);
+                var dto = await _countableResource.ChangeValueBy(customerId, decrementSize);
+                if (dto.Success)
+                    return Ok("Resource decremented");
+                
+                return dto.ExceptionThrown
+                    ? InternalError()
+                    : BadRequest(dto.ErrorMessage);
             }
             catch (Exception)
             {

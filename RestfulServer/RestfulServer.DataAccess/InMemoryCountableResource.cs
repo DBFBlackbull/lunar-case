@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using RestfulServer.Core.DataAccess;
+using RestfulServer.Core.DataAccess.Models;
 
 namespace RestfulServer.DataAccess
 {
@@ -13,29 +14,34 @@ namespace RestfulServer.DataAccess
             _dictionary = new Dictionary<string, int>();
         }
 
-        public int GetValue(string id)
+        public async Task<ValueDto> GetValue(string id)
         {
-            AssertValidId(id);
+            var dto = new ValueDto();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                dto.ErrorMessage = "Id is not valid";
+                return dto;
+            }
 
             _dictionary.TryGetValue(id, out var value);
-            return value;
+            dto.Value = value;
+            return dto;
         }
 
-        public bool ChangeValue(string id, int changeSize)
+        public async Task<ValueDto> ChangeValueBy(string id, int value)
         {
-            AssertValidId(id);
+            var dto = new ValueDto();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                dto.ErrorMessage = "Id is not valid";
+                return dto;
+            }
 
             if (!_dictionary.ContainsKey(id))
                 _dictionary[id] = 0;
 
-            _dictionary[id] += changeSize;
-            return true;
-        }
-        
-        private static void AssertValidId(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentNullException(nameof(id), "Id is not valid");
+            _dictionary[id] += value;
+            return dto;
         }
     }
 }
