@@ -6,7 +6,7 @@ using RestfulServer.Core.DataAccess;
 namespace RestfulServer.Website.Controllers
 {
     [ApiController]
-    [Route("[controller]/{customerId}/[action]")]
+    [Route("[controller]/{customerId}")]
     public class AccountController : Controller
     {
         private readonly ICountableResource _countableResource;
@@ -34,12 +34,12 @@ namespace RestfulServer.Website.Controllers
         }
 
         [HttpPut]
-        [Route("{increment:int?}")]
+        [Route("[action]/{increment:int?}")]
         public IActionResult IncrementResource([FromRoute] string customerId, [FromRoute] int? increment = null)
         {
             // We want to increment by 1 by default
             var incrementSize = increment ?? 1;
-            if (incrementSize < 0)
+            if (incrementSize < 1)
             {
                 return BadRequest(new
                 {
@@ -66,7 +66,7 @@ namespace RestfulServer.Website.Controllers
         }
 
         [HttpPut]
-        [Route("{decrement:int?}")]
+        [Route("[action]/{decrement:int?}")]
         public IActionResult DecrementResource([FromRoute] string customerId, [FromRoute] int? decrement)
         {
             // We want to increment by 1 by default
